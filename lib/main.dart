@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tick_stats_mobile/secondary_pages/login/login.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +16,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'TickStats'),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const MyHomePage(title: 'TickStats'),
+        '/login': (context) => const Login(),
+      },
     );
   }
 }
@@ -30,6 +36,24 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPersistency();
+  }
+
+  void _loadPersistency() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool logged = prefs.getBool('logged') ?? false;
+    if (!logged) {
+      prefs.setBool('logged', false);
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
