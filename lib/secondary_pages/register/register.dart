@@ -2,24 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:tick_stats_mobile/backend/communicator.dart';
 import 'package:tick_stats_mobile/secondary_pages/smallComponents.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class Register extends StatefulWidget {
+  const Register({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<Register> createState() => _RegisterState();
 }
 
-class _LoginState extends State<Login> {
+class _RegisterState extends State<Register> {
   TextEditingController nameController = TextEditingController(),
-      passwordController = TextEditingController();
+      passwordController = TextEditingController(), passwordController2 = TextEditingController();
   bool _isServerUnreachable = false,
       _isWrongCredentials = false,
-      _isLoginInProgress = false;
+      _isLoginInProgress = false,
+      _isPasswordNotMatching = false;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-
     return Scaffold(
       body: Center(
         child: Padding(
@@ -28,7 +28,7 @@ class _LoginState extends State<Login> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-                'Login to Tickstats',
+                'Sign to Tickstats',
                 style: textTheme.headlineMedium,
             ),
             const SizedBox(height: 20),
@@ -47,44 +47,60 @@ class _LoginState extends State<Login> {
                   labelText: 'Password'),
             ),
             const SizedBox(height: 20),
+            TextField(
+              obscureText: true,
+              controller: passwordController2,
+              decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Repeat Password'),
+            ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 _tryLogin();
               },
-              child: const Text('Login'),
+              child: const Text('submit'),
             ),
             if (_isServerUnreachable) const Text('Server unreachable', style: TextStyle(color: Colors.red)),
-            if (_isWrongCredentials) const Text('Wrong credentials', style: TextStyle(color: Colors.red)),
+            if (_isWrongCredentials) const Text('Username already taken', style: TextStyle(color: Colors.red)),
+            if (_isPasswordNotMatching) const Text('Passwords don\'t match', style: TextStyle(color: Colors.red)),
             if (_isLoginInProgress) const CircularProgressIndicator(),
-            const SizedBox(height: 20),
             HyperLink(
-              text: 'If you don\'t have an account, you can ',
-              hypertext: 'sign in.',
+              text: 'If you already have an account, you can ',
+              hypertext: 'log in.',
               onPressed: () async {
-                Navigator.pushReplacementNamed(context, '/register');
+                Navigator.pushReplacementNamed(context, '/login');
               },
             ),
           ],
-        ),)
-      ,
-    ),);
+          ),
+        ),
+      ),
+    );
   }
 
   void _tryLogin() {
+    if (nameController.text.isEmpty || passwordController.text.isEmpty || passwordController.text != passwordController2.text) {
+      setState(() {
+        _isPasswordNotMatching = true;
+      });
+      return;
+    }
+
     setState(() {
       _isLoginInProgress = true;
     });
 
     Communicator()
-        .login(nameController.text, passwordController.text)
+        .register(nameController.text, passwordController.text)
         .then((statusCode) {
           //custom status code
           switch (statusCode) {
             case 0:
-              //login successful
+            //login successful
               Navigator.pushReplacementNamed(context, '/');
               break;
-            case 401:
+            case 400:
             //wrong credentials
               setState(() {
                 _isWrongCredentials = true;

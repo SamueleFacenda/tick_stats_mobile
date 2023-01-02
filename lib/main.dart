@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tick_stats_mobile/secondary_pages/login/login.dart';
+import 'package:tick_stats_mobile/secondary_pages/register/register.dart';
 
+// adb connect 127.0.0.1:58526
 void main() {
   runApp(const MyApp());
 }
@@ -15,11 +17,13 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        backgroundColor: Colors.white,
       ),
       initialRoute: '/',
       routes: {
         '/': (context) => const MyHomePage(title: 'TickStats'),
         '/login': (context) => const Login(),
+        '/register': (context) => const Register(),
       },
     );
   }
